@@ -98,7 +98,7 @@ body {
 						height: $innerHeight;
 					}
 				}
-				&:hover >a{
+				&:hover > a{
 					background-color: #959595;
 				}
 				.icon {
@@ -205,7 +205,5 @@ body {
 		}
 	}
 }
-
-
 
 // @import "media"; // Always at the end

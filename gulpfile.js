@@ -2,8 +2,8 @@ var syntax = 'scss', // Syntax: sass or scss;
 	gulpVersion = '4'; // Gulp version: 3 or 4
 gmWatch = false; // ON/OFF GraphicsMagick watching "img/_src" folder (true/false). Linux install gm: sudo apt update; sudo apt install graphicsmagick
 
-var gulp = require('gulp')
-sass = require('gulp-sass'),
+var gulp = require('gulp'),
+	sass = require('gulp-sass'),
 	browserSync = require('browser-sync'),
 	concat = require('gulp-concat'),
 	uglify = require('gulp-uglify'),
@@ -65,6 +65,11 @@ gulp.task('img2x', function () {
 		.pipe(imagemin())
 		.pipe(gulp.dest('app/img/@2x/'))
 });
+gulp.task('imagemin', function () {
+	return gulp.src('app/img/**/*')
+		.pipe(imagemin()) // Cache Images
+		.pipe(gulp.dest('dist/img'));
+});
 
 // Clean @*x IMG's
 gulp.task('cleanimg', function () {
@@ -93,6 +98,35 @@ gulp.task('rsync', function () {
 		}))
 });
 
+gulp.task('removedist', function () { return del(['dist'], { force: true }) });
+gulp.task('clearcache', function () { return cache.clearAll(); });
+
+gulp.task('buildFiles', function () { return gulp.src(['app/*.html', 'app/ht.access']).pipe(gulp.dest('dist')) });
+gulp.task('buildCss', function () { return gulp.src(['app/css/main.min.css']).pipe(gulp.dest('dist/css')) });
+gulp.task('buildJs', function () { return gulp.src(['app/js/scripts.min.js']).pipe(gulp.dest('dist/js')) });
+gulp.task('buildFonts', function () { return gulp.src(['app/fonts/**/*']).pipe(gulp.dest('dist/fonts')) });
+
+gulp.task('build', gulp.series('removedist', 'imagemin', 'styles', 'scripts', 'buildFiles', 'buildCss', 'buildJs', 'buildFonts'));
+
+gulp.task('deploy', function () {
+
+	var conn = ftp.create({
+		host: 'hostname.com',
+		user: 'username',
+		password: 'userpassword',
+		parallel: 10
+	});
+
+	var globs = [
+		'dist/**',
+		'dist/ht.access',
+	];
+	return gulp.src(globs, { buffer: false })
+		.pipe(conn.dest('/path/to/folder/on/server'));
+
+});
+
+
 // If Gulp Version 3
 if (gulpVersion == 3) {
 
@@ -116,7 +150,7 @@ if (gulpVersion == 3) {
 if (gulpVersion == 4) {
 
 	// Img Processing Task for Gulp 4
-	gulp.task('img', gulp.parallel('img1x', 'img2x'));
+	gulp.task('img', gulp.parallel('img1x', 'img2x', 'imagemin'));
 
 	gulp.task('watch', function () {
 		gulp.watch('app/' + syntax + '/**/*.' + syntax + '', gulp.parallel('styles'));
@@ -125,6 +159,6 @@ if (gulpVersion == 4) {
 		gmWatch && gulp.watch('app/img/_src/**/*', gulp.parallel('img')); // GraphicsMagick watching image sources if allowed.
 	});
 	gmWatch ? gulp.task('default', gulp.parallel('img', 'styles', 'scripts', 'browser-sync', 'watch'))
-		: gulp.task('default', gulp.parallel('styles', 'scripts', 'browser-sync', 'watch'));
+		: gulp.task('default', gulp.parallel('img', 'styles', 'scripts', 'browser-sync', 'watch'));
 
 };

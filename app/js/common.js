@@ -4,7 +4,7 @@ $(document).ready(function () {
 	});
 	$('.icon-search').click(() => {
 		$('.search-form').toggle(500)
-	})
+	});
 });
 
 
