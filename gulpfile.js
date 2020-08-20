@@ -101,7 +101,7 @@ gulp.task('rsync', function () {
 gulp.task('removedist', function () { return del(['dist'], { force: true }) });
 gulp.task('clearcache', function () { return cache.clearAll(); });
 
-gulp.task('buildFiles', function () { return gulp.src(['app/*.html', 'app/ht.access']).pipe(gulp.dest('dist')) });
+gulp.task('buildFiles', function () { return gulp.src(['app/*.html', 'app/.htaccess']).pipe(gulp.dest('dist')) });
 gulp.task('buildCss', function () { return gulp.src(['app/css/main.min.css']).pipe(gulp.dest('dist/css')) });
 gulp.task('buildJs', function () { return gulp.src(['app/js/scripts.min.js']).pipe(gulp.dest('dist/js')) });
 gulp.task('buildFonts', function () { return gulp.src(['app/fonts/**/*']).pipe(gulp.dest('dist/fonts')) });
@@ -119,7 +119,7 @@ gulp.task('deploy', function () {
 
 	var globs = [
 		'dist/**',
-		'dist/ht.access',
+		'dist/.htaccess',
 	];
 	return gulp.src(globs, { buffer: false })
 		.pipe(conn.dest('/path/to/folder/on/server'));
